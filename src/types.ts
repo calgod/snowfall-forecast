@@ -22,8 +22,8 @@ export type DateRange = 'last-week' | 'today' | 'next-week'
 
 export interface LocationData {
     name: string
-    region?: string
-    country?: string
+    region?: string | undefined
+    country?: string | undefined
 }
 
 export interface GeocodingResult {

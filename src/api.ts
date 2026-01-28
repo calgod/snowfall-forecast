@@ -47,7 +47,7 @@ export async function fetchSnowfall(coords: Coordinates): Promise<SnowfallData> 
 }
 
 function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0]
+    return date.toISOString().split('T')[0] ?? ''
 }
 
 function getDateRange(range: DateRange): { startDate: string; endDate: string } {
@@ -140,8 +140,8 @@ export async function fetchLocationName(coords: Coordinates): Promise<LocationDa
 
     return {
         name,
-        region: data.address.state,
-        country: data.address.country,
+        region: data.address.state ?? undefined,
+        country: data.address.country ?? undefined,
     }
 }
 

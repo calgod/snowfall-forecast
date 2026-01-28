@@ -6,7 +6,7 @@ import type { Coordinates, DateRange, WeeklySnowfallData } from '../types'
 
 interface SnowfallDisplayProps {
     coords: Coordinates
-    manualLocationName?: string
+    manualLocationName?: string | undefined
     onReset: () => void
 }
 
@@ -89,8 +89,8 @@ export function SnowfallDisplay({ coords, manualLocationName, onReset }: Snowfal
                         key={range}
                         onClick={() => setSelectedRange(range)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedRange === range
-                                ? 'bg-white/20 text-white border border-white/30'
-                                : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-transparent'
+                            ? 'bg-white/20 text-white border border-white/30'
+                            : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-transparent'
                             }`}
                     >
                         {DATE_RANGE_LABELS[range]}
@@ -230,7 +230,7 @@ export function SnowfallDisplay({ coords, manualLocationName, onReset }: Snowfal
 }
 
 function formatLocationName(
-    data: { name: string; region?: string; country?: string } | undefined
+    data: { name: string; region?: string | undefined; country?: string | undefined } | undefined
 ): string {
     if (!data) return 'Unknown Location'
     if (data.region) {
@@ -258,16 +258,14 @@ function formatDate(dateString: string | undefined): string {
 
 function formatDateRange(data: WeeklySnowfallData | undefined): string {
     if (!data || data.days.length === 0) return ''
-    const startDate = new Date(data.days[0].date + 'T00:00:00')
-    const endDate = new Date(data.days[data.days.length - 1].date + 'T00:00:00')
+    const firstDay = data.days[0]
+    const lastDay = data.days[data.days.length - 1]
+    if (!firstDay || !lastDay) return ''
+    const startDate = new Date(firstDay.date + 'T00:00:00')
+    const endDate = new Date(lastDay.date + 'T00:00:00')
 
     const formatOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
     return `${startDate.toLocaleDateString('en-US', formatOptions)} - ${endDate.toLocaleDateString('en-US', formatOptions)}`
-}
-
-function formatShortDate(dateString: string): string {
-    const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
 function formatDayName(dateString: string): string {

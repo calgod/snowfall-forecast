@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getUserLocation, getLocationFromIp } from './api'
 import {
     SnowAnimation,
     LoadingSpinner,
@@ -8,16 +7,20 @@ import {
     SnowfallDisplay,
     FrostyHeader,
 } from './components'
+import { useIpLocation, useBrowserLocation } from './hooks'
 import type { Coordinates } from './types'
 
-type AppState = 'loading' | 'manual-input' | 'display'
-
 export default function App() {
-    const [state, setState] = useState<AppState>('loading')
-    const [coords, setCoords] = useState<Coordinates | null>(null)
-    const [manualLocationName, setManualLocationName] = useState<string | undefined>()
-    const [isApproximateLocation, setIsApproximateLocation] = useState(false)
+    const [manualLocation, setManualLocation] = useState<{ coords: Coordinates; name: string } | null>(null)
+    const [requestPreciseLocation] = useState(true) // Always prompt on initial load
+    const [forceManualInput, setForceManualInput] = useState(false)
     const [blizzardMode, setBlizzardMode] = useState(false)
+
+    // Fetch IP-based location (runs in background)
+    const ipLocationQuery = useIpLocation()
+
+    // Fetch browser location (prompts user on initial load)
+    const browserLocationQuery = useBrowserLocation(requestPreciseLocation)
 
     useEffect(() => {
         // Toggle body class for background color
@@ -28,62 +31,54 @@ export default function App() {
         }
     }, [blizzardMode])
 
-    useEffect(() => {
-        let mounted = true
+    // Determine current location state
+    const hasBrowserLocation = browserLocationQuery.isSuccess && browserLocationQuery.data
+    const hasIpLocation = ipLocationQuery.isSuccess && ipLocationQuery.data
+    const hasManualLocation = manualLocation !== null
 
-        // Try IP-based location first (no permission needed)
-        getLocationFromIp()
-            .then((ipLocation) => {
-                if (mounted) {
-                    setCoords(ipLocation.coords)
-                    setManualLocationName(
-                        ipLocation.region
-                            ? `${ipLocation.city}, ${ipLocation.region}`
-                            : ipLocation.city
-                    )
-                    setIsApproximateLocation(true)
-                    setState('display')
-                }
-            })
-            .catch(() => {
-                // IP geolocation failed, show manual input
-                if (mounted) {
-                    setState('manual-input')
-                }
-            })
+    // Priority: browser > IP (manual only when forceManualInput is true)
+    // When forceManualInput is true, show manual location if searched, otherwise show input form
+    const currentCoords = forceManualInput
+        ? manualLocation?.coords ?? null  // Only use manual when explicitly in manual mode
+        : (hasBrowserLocation ? browserLocationQuery.data : null)
+        ?? (hasIpLocation ? ipLocationQuery.data.coords : null)
 
-        return () => {
-            mounted = false
-        }
-    }, [])
+    const currentLocationName = forceManualInput
+        ? manualLocation?.name
+        : (hasIpLocation && !hasBrowserLocation
+            ? (ipLocationQuery.data.region
+                ? `${ipLocationQuery.data.city}, ${ipLocationQuery.data.region}`
+                : ipLocationQuery.data.city)
+            : undefined)
+
+    const isApproximate = !forceManualInput && !hasBrowserLocation && hasIpLocation ? true : false
+
+    // Loading: waiting for at least one location source (and not in manual mode)
+    const isLoading = !forceManualInput && !hasBrowserLocation && !hasIpLocation && (ipLocationQuery.isLoading || browserLocationQuery.isLoading)
+
+    // Show manual input when:
+    // 1. User clicked "check another location" (forceManualInput) AND hasn't searched yet
+    // 2. OR both location sources failed
+    const bothFailed = !forceManualInput && !isLoading && !hasBrowserLocation && !hasIpLocation &&
+        (ipLocationQuery.isError || ipLocationQuery.isSuccess) &&
+        (browserLocationQuery.isError || browserLocationQuery.isSuccess)
+    const showManualInput = (forceManualInput && !hasManualLocation) || bothFailed
 
     const handleManualLocation = (newCoords: Coordinates, locationName: string) => {
-        setCoords(newCoords)
-        setManualLocationName(locationName)
-        setIsApproximateLocation(false)
-        setState('display')
+        setManualLocation({ coords: newCoords, name: locationName })
+        // Stay in forceManualInput mode to show the searched location
     }
 
     const handleUsePreciseLocation = () => {
-        setState('loading')
-        getUserLocation()
-            .then((location) => {
-                setCoords(location)
-                setManualLocationName(undefined)
-                setIsApproximateLocation(false)
-                setState('display')
-            })
-            .catch(() => {
-                // If precise location fails, stay on current view
-                setState('display')
-            })
+        setForceManualInput(false) // Exit manual mode, go back to auto-detection
+        setManualLocation(null) // Clear any manual location
+        // Refetch browser location in case it failed previously
+        browserLocationQuery.refetch()
     }
 
     const handleReset = () => {
-        setCoords(null)
-        setManualLocationName(undefined)
-        setIsApproximateLocation(false)
-        setState('manual-input')
+        setManualLocation(null)
+        setForceManualInput(true) // Enter manual mode
     }
 
     return (
@@ -117,7 +112,7 @@ export default function App() {
                     : 'bg-white/10 border-white/20'
                     }`}>
                     <AnimatePresence mode="wait">
-                        {state === 'loading' && (
+                        {isLoading && (
                             <motion.div
                                 key="loading"
                                 initial={{ opacity: 0 }}
@@ -130,7 +125,7 @@ export default function App() {
                             </motion.div>
                         )}
 
-                        {state === 'manual-input' && (
+                        {showManualInput && (
                             <motion.div
                                 key="input"
                                 initial={{ opacity: 0 }}
@@ -142,7 +137,7 @@ export default function App() {
                             </motion.div>
                         )}
 
-                        {state === 'display' && coords && (
+                        {!isLoading && !showManualInput && currentCoords && (
                             <motion.div
                                 key="display"
                                 initial={{ opacity: 0 }}
@@ -150,9 +145,9 @@ export default function App() {
                                 exit={{ opacity: 0 }}
                             >
                                 <SnowfallDisplay
-                                    coords={coords}
-                                    manualLocationName={manualLocationName}
-                                    isApproximate={isApproximateLocation}
+                                    coords={currentCoords}
+                                    manualLocationName={currentLocationName}
+                                    isApproximate={isApproximate}
                                     onReset={handleReset}
                                     onUsePreciseLocation={handleUsePreciseLocation}
                                 />

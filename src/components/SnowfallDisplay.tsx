@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSnowfall, useLocationName, useWeeklySnowfall } from '../hooks'
 import { LoadingSpinner } from './LoadingSpinner'
 import type { Coordinates, DateRange, WeeklySnowfallData } from '../types'
@@ -25,14 +25,26 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
     const weeklyQuery = useWeeklySnowfall(coords, selectedRange)
     const locationQuery = useLocationName(manualLocationName ? null : coords)
 
-    const isLoading =
-        (selectedRange === 'today' && snowfallQuery.isLoading) ||
-        (selectedRange !== 'today' && weeklyQuery.isLoading) ||
-        (!manualLocationName && locationQuery.isLoading)
+    // Only show full loading spinner on initial load (no data yet)
+    const hasNoData =
+        (selectedRange === 'today' && !snowfallQuery.data) ||
+        (selectedRange !== 'today' && !weeklyQuery.data)
+
+    const isInitialLoading =
+        hasNoData && (
+            (selectedRange === 'today' && snowfallQuery.isLoading) ||
+            (selectedRange !== 'today' && weeklyQuery.isLoading) ||
+            (!manualLocationName && locationQuery.isLoading)
+        )
+
+    // Show subtle loading indicator when refetching
+    const isRefetching =
+        (selectedRange === 'today' && snowfallQuery.isFetching) ||
+        (selectedRange !== 'today' && weeklyQuery.isFetching)
 
     const error = snowfallQuery.error ?? weeklyQuery.error ?? locationQuery.error
 
-    if (isLoading) {
+    if (isInitialLoading) {
         return <LoadingSpinner />
     }
 
@@ -67,7 +79,7 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-            className="text-center"
+            className={`text-center transition-opacity duration-200 ${isRefetching ? 'opacity-70' : 'opacity-100'}`}
         >
             {/* Location name */}
             <motion.h2
@@ -215,26 +227,28 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
                 </motion.div>
             )}
 
-            {/* Reset button */}
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
-                {isApproximate && onUsePreciseLocation && (
-                    <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.8 }}
-                        onClick={onUsePreciseLocation}
-                        className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white hover:text-white transition-all text-sm flex items-center gap-2"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <span>📍</span>
-                        <span>Use precise location</span>
-                    </motion.button>
-                )}
+                <AnimatePresence mode="popLayout">
+                    {isApproximate && onUsePreciseLocation && (
+                        <motion.button
+                            key="precise-btn"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={onUsePreciseLocation}
+                            className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white hover:text-white transition-all text-sm flex items-center gap-2"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span>📍</span>
+                            <span>Use precise location</span>
+                        </motion.button>
+                    )}
+                </AnimatePresence>
                 <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
+                    layout
                     onClick={onReset}
                     className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white/70 hover:text-white transition-all text-sm"
                     whileHover={{ scale: 1.05 }}
@@ -245,16 +259,19 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
             </div>
 
             {/* Approximate location notice */}
-            {isApproximate && (
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1 }}
-                    className="text-white/40 text-xs mt-4 text-center"
-                >
-                    Location estimated from your IP address
-                </motion.p>
-            )}
+            <AnimatePresence>
+                {isApproximate && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-white/40 text-xs mt-4 text-center"
+                    >
+                        Location estimated from your IP address
+                    </motion.p>
+                )}
+            </AnimatePresence>
         </motion.div>
     )
 }

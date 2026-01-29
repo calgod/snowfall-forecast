@@ -15,7 +15,7 @@ const OPEN_METEO_FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 const OPEN_METEO_HISTORICAL_URL = 'https://archive-api.open-meteo.com/v1/archive'
 const OPEN_METEO_GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse'
-const IP_API_URL = 'http://ip-api.com/json'
+const IP_API_URL = 'https://ipapi.co/json'
 
 export async function fetchSnowfall(coords: Coordinates): Promise<SnowfallData> {
     const params = new URLSearchParams({
@@ -250,16 +250,16 @@ export function getUserLocation(): Promise<Coordinates> {
 }
 
 interface IpApiResponse {
-    status: string
-    lat: number
-    lon: number
+    latitude: number
+    longitude: number
     city: string
-    regionName: string
-    country: string
+    region: string
+    country_name: string
+    error?: boolean
 }
 
 export async function getLocationFromIp(): Promise<IpLocationResult> {
-    const response = await fetch(`${IP_API_URL}?fields=status,lat,lon,city,regionName,country`)
+    const response = await fetch(IP_API_URL)
 
     if (!response.ok) {
         throw new Error('IP geolocation failed')
@@ -267,18 +267,18 @@ export async function getLocationFromIp(): Promise<IpLocationResult> {
 
     const data: IpApiResponse = await response.json()
 
-    if (data.status !== 'success') {
+    if (data.error) {
         throw new Error('IP geolocation failed')
     }
 
     return {
         coords: {
-            latitude: data.lat,
-            longitude: data.lon,
+            latitude: data.latitude,
+            longitude: data.longitude,
         },
         city: data.city,
-        region: data.regionName,
-        country: data.country,
+        region: data.region,
+        country: data.country_name,
         isApproximate: true,
     }
 }

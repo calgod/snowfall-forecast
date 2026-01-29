@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useSnowfall, useLocationName, useWeeklySnowfall } from '../hooks'
 import { LoadingSpinner } from './LoadingSpinner'
 import type { Coordinates, DateRange, WeeklySnowfallData } from '../types'
@@ -50,11 +50,7 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
 
     if (error) {
         return (
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center"
-            >
+            <div className="text-center">
                 <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-3xl p-8">
                     <p className="text-red-200 text-lg mb-4">Failed to load weather data</p>
                     <p className="text-red-300/70 text-sm mb-6">{error.message}</p>
@@ -65,7 +61,7 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
                         Try Again
                     </button>
                 </div>
-            </motion.div>
+            </div>
         )
     }
 
@@ -75,204 +71,134 @@ export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onR
         : (weeklyQuery.data?.totalInches ?? 0)
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-            className={`text-center transition-opacity duration-200 ${isRefetching ? 'opacity-70' : 'opacity-100'}`}
+        <div
+            className={`text-center h-[420px] flex flex-col transition-opacity duration-200 ${isRefetching ? 'opacity-70' : 'opacity-100'}`}
         >
-            {/* Location name */}
-            <motion.h2
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-2xl md:text-3xl font-medium text-white/90 mb-2"
-            >
-                {locationName}
-            </motion.h2>
+            {/* ROW 1: Header - Location, Tabs, Date */}
+            <div className="flex-shrink-0">
+                {/* Location name */}
+                <h2 className="text-2xl md:text-3xl font-medium text-white/90 mb-2">
+                    {locationName}
+                </h2>
 
-            {/* Date Range Tabs */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.25 }}
-                className="flex justify-center gap-2 mb-6"
-            >
-                {(['last-week', 'today', 'next-week'] as DateRange[]).map((range) => (
-                    <button
-                        key={range}
-                        onClick={() => setSelectedRange(range)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedRange === range
-                            ? 'bg-white/20 text-white border border-white/30'
-                            : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-transparent'
-                            }`}
-                    >
-                        {DATE_RANGE_LABELS[range]}
-                    </button>
-                ))}
-            </motion.div>
-
-            {/* Date or Date Range */}
-            <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-white/50 text-lg mb-8"
-            >
-                {selectedRange === 'today'
-                    ? formatDate(snowfallQuery.data?.date)
-                    : formatDateRange(weeklyQuery.data)}
-            </motion.p>
-
-            {/* Snowfall amount */}
-            <motion.div
-                key={selectedRange}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, type: 'spring', damping: 15 }}
-                className={selectedRange === 'today' ? 'mb-8' : 'mb-4'}
-            >
-                {snowfall > 0 ? (
-                    <>
-                        <div className="flex items-baseline justify-center gap-2">
-                            <span className={`font-bold text-white drop-shadow-lg ${selectedRange === 'today' ? 'text-8xl md:text-9xl' : 'text-6xl md:text-7xl'}`}>
-                                {formatSnowfall(snowfall)}
-                            </span>
-                            <span className={`text-white/70 font-light ${selectedRange === 'today' ? 'text-3xl md:text-4xl' : 'text-2xl md:text-3xl'}`}>
-                                {snowfall === 1 ? 'inch' : 'inches'}
-                            </span>
-                        </div>
-                        <p className={`text-white/60 ${selectedRange === 'today' ? 'text-xl mt-4' : 'text-lg mt-2'}`}>
-                            {selectedRange === 'today'
-                                ? 'of snow expected'
-                                : selectedRange === 'last-week'
-                                    ? 'total snowfall'
-                                    : 'of snow forecasted'}
-                        </p>
-                    </>
-                ) : (
-                    <div className="py-8">
-                        <motion.div
-                            initial={{ rotate: -10 }}
-                            animate={{ rotate: 10 }}
-                            transition={{ repeat: Infinity, repeatType: 'reverse', duration: 2 }}
-                            className="text-7xl mb-4"
+                {/* Date Range Tabs */}
+                <div className="flex justify-center gap-2 mb-4">
+                    {(['last-week', 'today', 'next-week'] as DateRange[]).map((range) => (
+                        <button
+                            key={range}
+                            onClick={() => setSelectedRange(range)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedRange === range
+                                ? 'bg-white/20 text-white border border-white/30'
+                                : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-transparent'
+                                }`}
                         >
-                            ☀️
-                        </motion.div>
-                        <p className="text-3xl md:text-4xl font-medium text-white/90">No snow expected</p>
-                        <p className="text-white/50 text-lg mt-2">Clear skies ahead!</p>
-                    </div>
-                )}
-            </motion.div>
-
-            {/* Snowflake decoration for snowy days */}
-            {snowfall > 0 && selectedRange === 'today' && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex justify-center gap-4 mb-8"
-                >
-                    {[...Array(Math.min(5, Math.ceil(snowfall)))].map((_, i) => (
-                        <motion.span
-                            key={i}
-                            className="text-4xl"
-                            animate={{ y: [0, -10, 0] }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: i * 0.2,
-                            }}
-                        >
-                            ❄️
-                        </motion.span>
+                            {DATE_RANGE_LABELS[range]}
+                        </button>
                     ))}
-                </motion.div>
-            )}
+                </div>
 
-            {/* Daily breakdown for weekly views */}
-            {selectedRange !== 'today' && weeklyQuery.data && weeklyQuery.data.days.length > 0 && (
-                <motion.div
-                    key={`breakdown-${selectedRange}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-3 lg:p-4 mb-6"
-                >
-                    <div className="grid grid-cols-7 gap-1 lg:gap-2">
-                        {weeklyQuery.data.days.map((day, index) => (
+                {/* Date or Date Range */}
+                <p className="text-white/50 text-lg mb-4">
+                    {selectedRange === 'today'
+                        ? formatDate(snowfallQuery.data?.date)
+                        : formatDateRange(weeklyQuery.data)}
+                </p>
+            </div>
+
+            {/* ROW 2: Main Content - Snowfall amount + Weekly grid (always reserve space) */}
+            <div className="flex-1 min-h-0 flex flex-col justify-center">
+                {/* Snowfall amount */}
+                <div className="flex-shrink py-2">
+                    {snowfall > 0 ? (
+                        <div>
+                            <div className="flex items-baseline justify-center gap-2">
+                                <span className="font-bold text-white drop-shadow-lg text-5xl md:text-6xl lg:text-7xl">
+                                    {formatSnowfall(snowfall)}
+                                </span>
+                                <span className="text-white/70 font-light text-xl md:text-2xl">
+                                    {snowfall === 1 ? 'inch' : 'inches'}
+                                </span>
+                            </div>
+                            <p className="text-white/60 text-sm lg:text-base mt-1">
+                                {selectedRange === 'today'
+                                    ? 'of snow expected'
+                                    : selectedRange === 'last-week'
+                                        ? 'total snowfall'
+                                        : 'of snow forecasted'}
+                            </p>
+                        </div>
+                    ) : (
+                        <div>
                             <motion.div
-                                key={day.date}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.55 + index * 0.03 }}
-                                className="flex flex-col items-center py-2 px-1 rounded-lg hover:bg-white/5 transition-colors"
+                                className="text-5xl mb-1"
+                                animate={{ rotate: [-10, 10, -10] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                             >
-                                <span className="text-white/50 text-xs lg:text-sm">
-                                    {formatDayName(day.date)}
-                                </span>
-                                <span className="text-white/40 text-xs mb-1">
-                                    {formatDayDate(day.date)}
-                                </span>
-                                <span className={`text-sm lg:text-base font-semibold ${day.snowfallInches > 0 ? 'text-white' : 'text-white/30'
-                                    }`}>
-                                    {day.snowfallInches > 0
-                                        ? `${formatSnowfall(day.snowfallInches)}"`
-                                        : '—'}
-                                </span>
+                                ☀️
                             </motion.div>
-                        ))}
-                    </div>
-                </motion.div>
-            )}
+                            <p className="text-xl md:text-2xl font-medium text-white/90">No snow expected</p>
+                            <p className="text-white/50 text-sm mt-1">Clear skies ahead!</p>
+                        </div>
+                    )}
+                </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
-                <AnimatePresence mode="popLayout">
+                {/* Weekly breakdown - always reserve space, show content only for weekly views */}
+                <div className="mt-2 min-h-[60px] flex-shrink">
+                    {selectedRange !== 'today' && weeklyQuery.data && weeklyQuery.data.days.length > 0 ? (
+                        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-2">
+                            <div className="grid grid-cols-7 gap-1">
+                                {weeklyQuery.data.days.map((day) => (
+                                    <div
+                                        key={day.date}
+                                        className="flex flex-col items-center justify-center py-1 rounded-lg hover:bg-white/5 transition-colors"
+                                    >
+                                        <span className="text-white/50 text-xs">
+                                            {formatDayName(day.date)}
+                                        </span>
+                                        <span className={`text-sm font-semibold ${day.snowfallInches > 0 ? 'text-white' : 'text-white/30'}`}>
+                                            {day.snowfallInches > 0
+                                                ? `${formatSnowfall(day.snowfallInches)}"`
+                                                : '—'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        /* Empty placeholder to reserve space */
+                        <div className="min-h-[60px]" />
+                    )}
+                </div>
+            </div>
+
+            {/* ROW 3: Footer - Action buttons */}
+            <div className="flex-shrink-0 pt-4">
+                <div className="flex flex-row gap-2 items-center justify-center max-w-md mx-auto">
                     {isApproximate && onUsePreciseLocation && (
-                        <motion.button
-                            key="precise-btn"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
+                        <button
                             onClick={onUsePreciseLocation}
-                            className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white hover:text-white transition-all text-sm flex items-center gap-2"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            className="flex-1 min-w-0 px-3 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white hover:text-white transition-all text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2"
                         >
                             <span>📍</span>
                             <span>Use precise location</span>
-                        </motion.button>
+                        </button>
                     )}
-                </AnimatePresence>
-                <motion.button
-                    layout
-                    onClick={onReset}
-                    className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white/70 hover:text-white transition-all text-sm"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    Check another location
-                </motion.button>
-            </div>
-
-            {/* Approximate location notice */}
-            <AnimatePresence>
-                {isApproximate && (
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-white/40 text-xs mt-4 text-center"
+                    <button
+                        onClick={onReset}
+                        className="flex-1 min-w-0 px-3 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white/70 hover:text-white transition-all text-xs sm:text-sm"
                     >
+                        Check another location
+                    </button>
+                </div>
+
+                {/* Approximate location notice */}
+                {isApproximate && (
+                    <p className="text-white/40 text-xs mt-2 text-center">
                         Location estimated from your IP address
-                    </motion.p>
+                    </p>
                 )}
-            </AnimatePresence>
-        </motion.div>
+            </div>
+        </div>
     )
 }
 
@@ -318,9 +244,4 @@ function formatDateRange(data: WeeklySnowfallData | undefined): string {
 function formatDayName(dateString: string): string {
     const date = new Date(dateString + 'T00:00:00')
     return date.toLocaleDateString('en-US', { weekday: 'short' })
-}
-
-function formatDayDate(dateString: string): string {
-    const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }

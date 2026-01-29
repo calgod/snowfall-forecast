@@ -66,7 +66,7 @@ export default function App() {
 
     const handleManualLocation = (newCoords: Coordinates, locationName: string) => {
         setManualLocation({ coords: newCoords, name: locationName })
-        // Stay in forceManualInput mode to show the searched location
+        setForceManualInput(true) // Ensure we're in manual mode to display the result
     }
 
     const handleUsePreciseLocation = () => {
@@ -102,7 +102,7 @@ export default function App() {
                 <span>{blizzardMode ? 'Blizzard' : 'Dark Mode'}</span>
             </motion.button>
 
-            <div className="relative z-10 w-full max-w-2xl mx-auto">
+            <div className="relative z-10 w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                 {/* Header */}
                 <FrostyHeader blizzardMode={blizzardMode} />
 

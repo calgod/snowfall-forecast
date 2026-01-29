@@ -26,6 +26,14 @@ export interface LocationData {
     country?: string | undefined
 }
 
+export interface IpLocationResult {
+    coords: Coordinates
+    city: string
+    region?: string
+    country?: string
+    isApproximate: true
+}
+
 export interface GeocodingResult {
     name: string
     latitude: number

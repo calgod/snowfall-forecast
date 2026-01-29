@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getUserLocation } from './api'
+import { getUserLocation, getLocationFromIp } from './api'
 import {
     SnowAnimation,
     LoadingSpinner,
@@ -16,7 +16,7 @@ export default function App() {
     const [state, setState] = useState<AppState>('loading')
     const [coords, setCoords] = useState<Coordinates | null>(null)
     const [manualLocationName, setManualLocationName] = useState<string | undefined>()
-    const [geoError, setGeoError] = useState<string | null>(null)
+    const [isApproximateLocation, setIsApproximateLocation] = useState(false)
     const [blizzardMode, setBlizzardMode] = useState(false)
 
     useEffect(() => {
@@ -31,16 +31,23 @@ export default function App() {
     useEffect(() => {
         let mounted = true
 
-        getUserLocation()
-            .then((location) => {
+        // Try IP-based location first (no permission needed)
+        getLocationFromIp()
+            .then((ipLocation) => {
                 if (mounted) {
-                    setCoords(location)
+                    setCoords(ipLocation.coords)
+                    setManualLocationName(
+                        ipLocation.region
+                            ? `${ipLocation.city}, ${ipLocation.region}`
+                            : ipLocation.city
+                    )
+                    setIsApproximateLocation(true)
                     setState('display')
                 }
             })
-            .catch((error: Error) => {
+            .catch(() => {
+                // IP geolocation failed, show manual input
                 if (mounted) {
-                    setGeoError(error.message)
                     setState('manual-input')
                 }
             })
@@ -53,12 +60,29 @@ export default function App() {
     const handleManualLocation = (newCoords: Coordinates, locationName: string) => {
         setCoords(newCoords)
         setManualLocationName(locationName)
+        setIsApproximateLocation(false)
         setState('display')
+    }
+
+    const handleUsePreciseLocation = () => {
+        setState('loading')
+        getUserLocation()
+            .then((location) => {
+                setCoords(location)
+                setManualLocationName(undefined)
+                setIsApproximateLocation(false)
+                setState('display')
+            })
+            .catch(() => {
+                // If precise location fails, stay on current view
+                setState('display')
+            })
     }
 
     const handleReset = () => {
         setCoords(null)
         setManualLocationName(undefined)
+        setIsApproximateLocation(false)
         setState('manual-input')
     }
 
@@ -114,18 +138,6 @@ export default function App() {
                                 exit={{ opacity: 0 }}
                                 className="flex flex-col items-center"
                             >
-                                {geoError && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="bg-amber-500/20 border border-amber-400/30 rounded-xl px-4 py-3 mb-6 text-center"
-                                    >
-                                        <p className="text-amber-200 text-sm">{geoError}</p>
-                                        <p className="text-amber-200/70 text-xs mt-1">
-                                            Enter a location manually below
-                                        </p>
-                                    </motion.div>
-                                )}
                                 <LocationInput onLocationFound={handleManualLocation} />
                             </motion.div>
                         )}
@@ -140,7 +152,9 @@ export default function App() {
                                 <SnowfallDisplay
                                     coords={coords}
                                     manualLocationName={manualLocationName}
+                                    isApproximate={isApproximateLocation}
                                     onReset={handleReset}
+                                    onUsePreciseLocation={handleUsePreciseLocation}
                                 />
                             </motion.div>
                         )}

@@ -7,7 +7,9 @@ import type { Coordinates, DateRange, WeeklySnowfallData } from '../types'
 interface SnowfallDisplayProps {
     coords: Coordinates
     manualLocationName?: string | undefined
+    isApproximate?: boolean
     onReset: () => void
+    onUsePreciseLocation?: () => void
 }
 
 const DATE_RANGE_LABELS: Record<DateRange, string> = {
@@ -16,7 +18,7 @@ const DATE_RANGE_LABELS: Record<DateRange, string> = {
     'next-week': 'Next 7 Days',
 }
 
-export function SnowfallDisplay({ coords, manualLocationName, onReset }: SnowfallDisplayProps) {
+export function SnowfallDisplay({ coords, manualLocationName, isApproximate, onReset, onUsePreciseLocation }: SnowfallDisplayProps) {
     const [selectedRange, setSelectedRange] = useState<DateRange>('today')
 
     const snowfallQuery = useSnowfall(coords)
@@ -214,17 +216,45 @@ export function SnowfallDisplay({ coords, manualLocationName, onReset }: Snowfal
             )}
 
             {/* Reset button */}
-            <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                onClick={onReset}
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white/70 hover:text-white transition-all text-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-            >
-                Check another location
-            </motion.button>
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+                {isApproximate && onUsePreciseLocation && (
+                    <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                        onClick={onUsePreciseLocation}
+                        className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white hover:text-white transition-all text-sm flex items-center gap-2"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <span>📍</span>
+                        <span>Use precise location</span>
+                    </motion.button>
+                )}
+                <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    onClick={onReset}
+                    className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white/70 hover:text-white transition-all text-sm"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    Check another location
+                </motion.button>
+            </div>
+
+            {/* Approximate location notice */}
+            {isApproximate && (
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    className="text-white/40 text-xs mt-4 text-center"
+                >
+                    Location estimated from your IP address
+                </motion.p>
+            )}
         </motion.div>
     )
 }

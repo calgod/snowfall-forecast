@@ -145,10 +145,45 @@ export async function fetchLocationName(coords: Coordinates): Promise<LocationDa
     }
 }
 
+// US state abbreviations mapping
+const STATE_ABBREVIATIONS: Record<string, string> = {
+    al: 'alabama', ak: 'alaska', az: 'arizona', ar: 'arkansas', ca: 'california',
+    co: 'colorado', ct: 'connecticut', de: 'delaware', fl: 'florida', ga: 'georgia',
+    hi: 'hawaii', id: 'idaho', il: 'illinois', in: 'indiana', ia: 'iowa',
+    ks: 'kansas', ky: 'kentucky', la: 'louisiana', me: 'maine', md: 'maryland',
+    ma: 'massachusetts', mi: 'michigan', mn: 'minnesota', ms: 'mississippi', mo: 'missouri',
+    mt: 'montana', ne: 'nebraska', nv: 'nevada', nh: 'new hampshire', nj: 'new jersey',
+    nm: 'new mexico', ny: 'new york', nc: 'north carolina', nd: 'north dakota', oh: 'ohio',
+    ok: 'oklahoma', or: 'oregon', pa: 'pennsylvania', ri: 'rhode island', sc: 'south carolina',
+    sd: 'south dakota', tn: 'tennessee', tx: 'texas', ut: 'utah', vt: 'vermont',
+    va: 'virginia', wa: 'washington', wv: 'west virginia', wi: 'wisconsin', wy: 'wyoming',
+    dc: 'district of columbia',
+}
+
+function matchesState(stateFilter: string, admin1: string | undefined): boolean {
+    if (!admin1) return false
+    const admin1Lower = admin1.toLowerCase()
+    const filterLower = stateFilter.toLowerCase().replace(/\./g, '')
+
+    // Direct match
+    if (admin1Lower.includes(filterLower) || filterLower.includes(admin1Lower)) {
+        return true
+    }
+
+    // Abbreviation match
+    const fullStateName = STATE_ABBREVIATIONS[filterLower]
+    return fullStateName !== undefined && admin1Lower.includes(fullStateName)
+}
+
 export async function searchLocation(query: string): Promise<GeocodingResult | null> {
+    // Parse "City, State" format
+    const parts = query.split(',').map((p) => p.trim())
+    const searchName = parts[0] ?? query
+    const stateFilter = parts.length > 1 ? parts[1] : undefined
+
     const params = new URLSearchParams({
-        name: query,
-        count: '1',
+        name: searchName,
+        count: stateFilter ? '20' : '1',
         language: 'en',
         format: 'json',
     })
@@ -165,8 +200,13 @@ export async function searchLocation(query: string): Promise<GeocodingResult | n
         return null
     }
 
-    const result = data.results[0]
-    return result ?? null
+    // If user specified a state, filter results to match
+    if (stateFilter) {
+        const filtered = data.results.find((r) => matchesState(stateFilter, r.admin1))
+        return filtered ?? data.results[0] ?? null
+    }
+
+    return data.results[0] ?? null
 }
 
 export function getUserLocation(): Promise<Coordinates> {

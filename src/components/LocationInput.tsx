@@ -48,7 +48,7 @@ export function LocationInput({ onLocationFound }: LocationInputProps) {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Enter city name..."
+                        placeholder="City, State or zip code"
                         className="w-full px-6 py-4 text-lg bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all"
                         disabled={isSearching}
                     />

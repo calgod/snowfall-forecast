@@ -91,15 +91,15 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
                 onClick={() => setBlizzardMode(!blizzardMode)}
-                className={`fixed top-4 right-4 z-20 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${blizzardMode
+                className={`fixed top-4 right-4 z-20 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${blizzardMode
                     ? 'bg-white/20 text-white border border-white/30 shadow-lg shadow-white/10'
                     : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 hover:text-white'
                     }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
-                <span className="text-lg">{blizzardMode ? '🌨️' : '🌙'}</span>
-                <span>{blizzardMode ? 'Blizzard' : 'Dark Mode'}</span>
+                <span className="text-xl sm:text-lg">{blizzardMode ? '🌨️' : '🌙'}</span>
+                <span className="hidden sm:inline">{blizzardMode ? 'Blizzard' : 'Dark Mode'}</span>
             </motion.button>
 
             <div className="relative z-10 w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">

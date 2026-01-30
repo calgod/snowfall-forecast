@@ -21,3 +21,11 @@ body.blizzard-mode {
 #root {
     min-height: 100vh;
 }
+
+/* --- iOS input/button appearance fix --- */
+input,
+textarea,
+button {
+    -webkit-appearance: none;
+    appearance: none;
+}

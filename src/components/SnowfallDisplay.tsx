@@ -53,17 +53,15 @@ export function SnowfallDisplay({
     if (error) {
         return (
             <div className="text-center">
-                <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-3xl p-8">
+                <div className="bg-red-500/20 border border-red-400/30 rounded-3xl p-8">
                     <p className="text-red-200 text-lg mb-4">Failed to load weather data</p>
                     <p className="text-red-300/70 text-sm mb-6">{error.message}</p>
-                    <div className="inline-block bg-white/20 hover:bg-white/30 rounded-xl">
-                        <button
-                            onClick={onReset}
-                            className="px-6 py-3 w-full bg-transparent appearance-none text-white transition-all rounded-xl"
-                        >
-                            Try Again
-                        </button>
-                    </div>
+                    <button
+                        onClick={onReset}
+                        className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white transition-all rounded-xl"
+                    >
+                        Try Again
+                    </button>
                 </div>
             </div>
         )
@@ -89,23 +87,16 @@ export function SnowfallDisplay({
                 {/* Date Range Tabs */}
                 <div className="flex justify-center gap-2 mb-4">
                     {(['last-week', 'today', 'next-week'] as DateRange[]).map((range) => (
-                        <div
+                        <button
                             key={range}
-                            className={`rounded-lg transition-all ${selectedRange === range
-                                ? 'bg-white/20 border border-white/30'
-                                : 'bg-white/5 border border-transparent'
+                            onClick={() => setSelectedRange(range)}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedRange === range
+                                ? 'bg-white/20 border border-white/30 text-white'
+                                : 'bg-white/5 border border-transparent text-white/60 hover:text-white/80 hover:bg-white/10'
                                 }`}
                         >
-                            <button
-                                onClick={() => setSelectedRange(range)}
-                                className={`px-4 py-2 text-sm font-medium w-full bg-transparent appearance-none transition-all ${selectedRange === range
-                                    ? 'text-white'
-                                    : 'text-white/60 hover:text-white/80 hover:bg-white/10'
-                                    }`}
-                            >
-                                {DATE_RANGE_LABELS[range]}
-                            </button>
-                        </div>
+                            {DATE_RANGE_LABELS[range]}
+                        </button>
                     ))}
                 </div>
 
@@ -156,7 +147,7 @@ export function SnowfallDisplay({
 
                 <div className="mt-2 min-h-[60px] flex-shrink">
                     {selectedRange !== 'today' && weeklyQuery.data && weeklyQuery.data.days.length > 0 ? (
-                        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-2">
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-2">
                             <div className="grid grid-cols-7 gap-1">
                                 {weeklyQuery.data.days.map((day) => (
                                     <div
@@ -188,24 +179,20 @@ export function SnowfallDisplay({
             <div className="flex-shrink-0 pt-4">
                 <div className="flex flex-row gap-2 items-center justify-center max-w-md mx-auto">
                     {isApproximate && onUsePreciseLocation && (
-                        <div className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl transition-all">
-                            <button
-                                onClick={onUsePreciseLocation}
-                                className="w-full flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 bg-transparent appearance-none text-white text-xs sm:text-sm"
-                            >
-                                <span>📍</span>
-                                <span>Use precise location</span>
-                            </button>
-                        </div>
-                    )}
-                    <div className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl transition-all">
                         <button
-                            onClick={onReset}
-                            className="w-full px-3 py-2 bg-transparent appearance-none text-white/70 hover:text-white text-xs sm:text-sm"
+                            onClick={onUsePreciseLocation}
+                            className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 border border-white/30 rounded-xl transition-all text-white text-xs sm:text-sm"
                         >
-                            Check another location
+                            <span>📍</span>
+                            <span>Use precise location</span>
                         </button>
-                    </div>
+                    )}
+                    <button
+                        onClick={onReset}
+                        className="flex-1 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all text-white/70 hover:text-white text-xs sm:text-sm"
+                    >
+                        Check another location
+                    </button>
                 </div>
 
                 {isApproximate && (

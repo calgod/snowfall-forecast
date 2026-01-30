@@ -36,7 +36,7 @@ export async function fetchSnowfall(coords: Coordinates): Promise<SnowfallData> 
     const data: OpenMeteoForecastResponse = await response.json()
 
     const date = data.daily.time[0]
-    const snowfall = data.daily.snowfall_sum[0]
+    const snowfall = data.daily.snowfall_sum?.[0]
 
     if (date === undefined || snowfall === undefined) {
         throw new Error('Invalid response from weather API')
@@ -52,7 +52,7 @@ function formatDate(date: Date): string {
     return date.toISOString().split('T')[0] ?? ''
 }
 
-function getDateRange(range: DateRange): { startDate: string; endDate: string } {
+function getDateRange(range: DateRange): { startDate: string; endDate: string; baselineDate?: string } {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -61,7 +61,9 @@ function getDateRange(range: DateRange): { startDate: string; endDate: string } 
         endDate.setDate(endDate.getDate() - 1) // Yesterday
         const startDate = new Date(today)
         startDate.setDate(startDate.getDate() - 7) // 7 days ago
-        return { startDate: formatDate(startDate), endDate: formatDate(endDate) }
+        const baselineDate = new Date(startDate)
+        baselineDate.setDate(baselineDate.getDate() - 1) // Day before start for baseline
+        return { startDate: formatDate(startDate), endDate: formatDate(endDate), baselineDate: formatDate(baselineDate) }
     } else if (range === 'next-week') {
         const startDate = new Date(today)
         startDate.setDate(startDate.getDate() + 1) // Tomorrow
@@ -77,18 +79,25 @@ export async function fetchWeeklySnowfall(
     coords: Coordinates,
     range: DateRange
 ): Promise<WeeklySnowfallData> {
-    const { startDate, endDate } = getDateRange(range)
+    const { startDate, endDate, baselineDate } = getDateRange(range)
 
     // Use historical API for past data, forecast API for today and future
     const apiUrl = range === 'last-week' ? OPEN_METEO_HISTORICAL_URL : OPEN_METEO_FORECAST_URL
 
+    // For historical data, fetch both snow_depth_max and snowfall_sum
+    // snow_depth_max is more accurate but has data gaps in some locations
+    const dailyParam = range === 'last-week' ? 'snow_depth_max,snowfall_sum' : 'snowfall_sum'
+
+    // For historical data, fetch one extra day before the range as baseline
+    const fetchStartDate = baselineDate ?? startDate
+
     const params = new URLSearchParams({
         latitude: coords.latitude.toString(),
         longitude: coords.longitude.toString(),
-        daily: 'snowfall_sum',
+        daily: dailyParam,
         precipitation_unit: 'inch',
         timezone: 'auto',
-        start_date: startDate,
+        start_date: fetchStartDate,
         end_date: endDate,
     })
 
@@ -100,16 +109,59 @@ export async function fetchWeeklySnowfall(
 
     const data: OpenMeteoForecastResponse = await response.json()
 
-    const days = data.daily.time.map((date, index) => ({
-        date,
-        snowfallInches: data.daily.snowfall_sum[index] ?? 0,
-    }))
+    if (range === 'last-week') {
+        // Check if snow_depth_max has valid data (not all zeros)
+        const depthValues = data.daily.snow_depth_max ?? []
+        const hasValidDepthData = depthValues.some(v => (v ?? 0) > 0)
 
-    const totalInches = days.reduce((sum, day) => sum + day.snowfallInches, 0)
+        if (hasValidDepthData) {
+            // Use snow_depth_max (more accurate) - returns feet, convert to inches
+            const depthInInches = depthValues.map(ft => (ft ?? 0) * 12)
 
-    return {
-        days,
-        totalInches,
+            // First value is baseline day, skip it in output but use for day 1 calculation
+            const days = data.daily.time.slice(1).map((date, index) => {
+                const actualIndex = index + 1 // Offset since we sliced
+                const currentDepth = depthInInches[actualIndex] ?? 0
+                const previousDepth = depthInInches[actualIndex - 1] ?? 0
+                // Only count increases (new snow), not decreases (melting)
+                const dailySnowfall = Math.max(0, currentDepth - previousDepth)
+                return {
+                    date,
+                    snowfallInches: Math.round(dailySnowfall * 10) / 10,
+                }
+            })
+
+            // Total is max depth (excluding baseline) minus baseline depth
+            const baselineDepth = depthInInches[0] ?? 0
+            const maxDepthInRange = Math.max(...depthInInches.slice(1))
+            const totalInches = Math.max(0, Math.round((maxDepthInRange - baselineDepth) * 10) / 10)
+
+            return { days, totalInches }
+        } else {
+            // Fallback to snowfall_sum if snow_depth_max has no data
+            // Skip baseline day (index 0) for snowfall_sum as well
+            const days = data.daily.time.slice(1).map((date, index) => ({
+                date,
+                snowfallInches: data.daily.snowfall_sum?.[index + 1] ?? 0,
+            }))
+
+            const totalInches = Math.round(days.reduce((sum, day) => sum + day.snowfallInches, 0) * 10) / 10
+
+            return { days, totalInches }
+        }
+    } else {
+        // For forecasts, use snowfall_sum directly (already in inches)
+        const days = data.daily.time.map((date, index) => ({
+            date,
+            snowfallInches: data.daily.snowfall_sum?.[index] ?? 0,
+        }))
+
+        const totalInches = days.reduce((sum, day) => sum + day.snowfallInches, 0)
+
+        return {
+            days,
+            totalInches,
+        }
     }
 }
 

@@ -49,10 +49,12 @@ export interface OpenMeteoForecastResponse {
     timezone: string
     daily: {
         time: string[]
-        snowfall_sum: number[]
+        snowfall_sum?: number[]
+        snow_depth_max?: number[]
     }
     daily_units: {
-        snowfall_sum: string
+        snowfall_sum?: string
+        snow_depth_max?: string
     }
 }
 

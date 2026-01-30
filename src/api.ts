@@ -131,10 +131,8 @@ export async function fetchWeeklySnowfall(
                 }
             })
 
-            // Total is max depth (excluding baseline) minus baseline depth
-            const baselineDepth = depthInInches[0] ?? 0
-            const maxDepthInRange = Math.max(...depthInInches.slice(1))
-            const totalInches = Math.max(0, Math.round((maxDepthInRange - baselineDepth) * 10) / 10)
+            // Total is sum of all daily snowfall (accounts for melting between storms)
+            const totalInches = Math.round(days.reduce((sum, day) => sum + day.snowfallInches, 0) * 10) / 10
 
             return { days, totalInches }
         } else {

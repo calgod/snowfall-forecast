@@ -3,16 +3,7 @@
 @tailwind utilities;
 
 :root {
-    color-scheme: dark;
-}
-
-/* Reset iOS form control styling */
-input,
-button {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-color: transparent;
+    color-scheme: light dark;
 }
 
 body {

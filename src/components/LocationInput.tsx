@@ -49,7 +49,7 @@ export function LocationInput({ onLocationFound }: LocationInputProps) {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="City, State or zip code"
-                        className="w-full px-6 py-4 text-lg bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all"
+                        className="w-full px-6 py-4 text-lg appearance-none bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all"
                         disabled={isSearching}
                     />
                     {isSearching && (
@@ -66,7 +66,7 @@ export function LocationInput({ onLocationFound }: LocationInputProps) {
                 <motion.button
                     type="submit"
                     disabled={isSearching || !query.trim()}
-                    className="px-8 py-4 bg-white/20 hover:bg-white/30 disabled:bg-white/5 disabled:cursor-not-allowed backdrop-blur-sm border border-white/20 rounded-2xl text-white font-medium text-lg transition-all"
+                    className="px-8 py-4 appearance-none bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:cursor-not-allowed backdrop-blur-sm border border-white/20 rounded-2xl text-white font-medium text-lg transition-all"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >

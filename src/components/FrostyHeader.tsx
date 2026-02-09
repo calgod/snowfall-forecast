@@ -30,10 +30,10 @@ export function FrostyHeader({ darkMode = false }: FrostyHeaderProps) {
 
                     {/* Blizzard variant - colder, more intense */}
                     <linearGradient id="iceGlassBlizzard" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                        <stop offset="30%" stopColor="#d4eaf5" stopOpacity="0.95" />
-                        <stop offset="70%" stopColor="#8fc9e8" stopOpacity="0.9" />
-                        <stop offset="100%" stopColor="#5ba8d4" stopOpacity="1" />
+                        <stop offset="0%" stopColor="#c8dce8" stopOpacity="1" />
+                        <stop offset="30%" stopColor="#9fc5da" stopOpacity="0.95" />
+                        <stop offset="70%" stopColor="#6aa4c4" stopOpacity="0.9" />
+                        <stop offset="100%" stopColor="#4889ab" stopOpacity="1" />
                     </linearGradient>
 
                     {/* Glass reflection highlight */}
@@ -57,22 +57,6 @@ export function FrostyHeader({ darkMode = false }: FrostyHeaderProps) {
                     {/* Crisp drop shadow */}
                     <filter id="crispShadow" x="-10%" y="-10%" width="120%" height="130%">
                         <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor="#1a4a6e" floodOpacity="0.25" />
-                    </filter>
-
-                    {/* Glass edge effect */}
-                    <filter id="glassEdge" x="-5%" y="-5%" width="110%" height="110%">
-                        <feMorphology operator="dilate" radius="0.5" result="dilated" />
-                        <feFlood floodColor="#ffffff" floodOpacity="0.3" />
-                        <feComposite in2="dilated" operator="in" result="outline" />
-                        <feMerge>
-                            <feMergeNode in="outline" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-
-                    {/* Frosted blur for background elements */}
-                    <filter id="frosted" x="-10%" y="-10%" width="120%" height="120%">
-                        <feGaussianBlur stdDeviation="0.5" />
                     </filter>
 
                     {/* Clip path for glass reflection */}
@@ -101,16 +85,6 @@ export function FrostyHeader({ darkMode = false }: FrostyHeaderProps) {
                         </text>
                     </clipPath>
                 </defs>
-
-                {/* Subtle background frost line */}
-                <motion.line
-                    x1="100"
-                    y1="95"
-                    x2="400"
-                    y2="95"
-                    stroke={darkMode ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.1)"}
-                    strokeWidth="1"
-                />
 
                 {/* Main text - base layer with glass gradient */}
                 <text
@@ -149,6 +123,7 @@ export function FrostyHeader({ darkMode = false }: FrostyHeaderProps) {
                     fill={`url(#${darkMode ? 'iceGlassBlizzard' : 'iceGlass'})`}
                     letterSpacing="6"
                     opacity="0.9"
+                    filter="url(#innerGlow)"
                 >
                     FORECAST
                 </text>

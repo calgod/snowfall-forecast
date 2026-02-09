@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion'
 
 interface FrostyHeaderProps {
-    blizzardMode?: boolean
+    darkMode?: boolean
 }
 
-export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
+export function FrostyHeader({ darkMode = false }: FrostyHeaderProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -108,7 +108,7 @@ export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
                     y1="95"
                     x2="400"
                     y2="95"
-                    stroke={blizzardMode ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.1)"}
+                    stroke={darkMode ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.1)"}
                     strokeWidth="1"
                 />
 
@@ -120,7 +120,7 @@ export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
                     fontSize="52"
                     fontWeight="700"
                     fontFamily="system-ui, -apple-system, sans-serif"
-                    fill={`url(#${blizzardMode ? 'iceGlassBlizzard' : 'iceGlass'})`}
+                    fill={`url(#${darkMode ? 'iceGlassBlizzard' : 'iceGlass'})`}
                     filter="url(#crispShadow)"
                     letterSpacing="-1"
                 >
@@ -146,7 +146,7 @@ export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
                     fontSize="24"
                     fontWeight="300"
                     fontFamily="system-ui, -apple-system, sans-serif"
-                    fill={`url(#${blizzardMode ? 'iceGlassBlizzard' : 'iceGlass'})`}
+                    fill={`url(#${darkMode ? 'iceGlassBlizzard' : 'iceGlass'})`}
                     letterSpacing="6"
                     opacity="0.9"
                 >
@@ -163,7 +163,7 @@ export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
                         <motion.polygon
                             points={`${crystal.x},${crystal.y - crystal.size} ${crystal.x + crystal.size * 0.866},${crystal.y - crystal.size * 0.5} ${crystal.x + crystal.size * 0.866},${crystal.y + crystal.size * 0.5} ${crystal.x},${crystal.y + crystal.size} ${crystal.x - crystal.size * 0.866},${crystal.y + crystal.size * 0.5} ${crystal.x - crystal.size * 0.866},${crystal.y - crystal.size * 0.5}`}
                             fill="none"
-                            stroke={blizzardMode ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)"}
+                            stroke={darkMode ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)"}
                             strokeWidth="1"
                             animate={{
                                 opacity: [0.3, 0.7, 0.3],
@@ -205,7 +205,7 @@ export function FrostyHeader({ blizzardMode = false }: FrostyHeaderProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className={`text-base mt-4 transition-colors duration-300 ${blizzardMode ? 'text-white/60' : 'text-white/50'}`}
+                className={`text-base mt-4 transition-colors duration-300 ${darkMode ? 'text-white/60' : 'text-white/50'}`}
             >
                 See how much snow is expected in your area
             </motion.p>

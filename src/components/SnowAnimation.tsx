@@ -11,25 +11,25 @@ interface Snowflake {
 }
 
 interface SnowAnimationProps {
-    blizzardMode?: boolean
+    darkMode?: boolean
 }
 
-export function SnowAnimation({ blizzardMode = false }: SnowAnimationProps) {
+export function SnowAnimation({ darkMode = false }: SnowAnimationProps) {
     const snowflakes = useMemo<Snowflake[]>(() => {
-        const count = blizzardMode ? 120 : 50
+        const count = darkMode ? 120 : 50
         return Array.from({ length: count }, (_, i) => ({
             id: i,
             x: Math.random() * 100,
-            delay: Math.random() * (blizzardMode ? 5 : 10),
-            duration: blizzardMode ? 3 + Math.random() * 5 : 10 + Math.random() * 20,
-            size: blizzardMode ? 2 + Math.random() * 6 : 4 + Math.random() * 8,
-            opacity: blizzardMode ? 0.5 + Math.random() * 0.5 : 0.3 + Math.random() * 0.5,
+            delay: Math.random() * (darkMode ? 5 : 10),
+            duration: darkMode ? 3 + Math.random() * 5 : 10 + Math.random() * 20,
+            size: darkMode ? 2 + Math.random() * 6 : 4 + Math.random() * 8,
+            opacity: darkMode ? 0.5 + Math.random() * 0.5 : 0.3 + Math.random() * 0.5,
         }))
-    }, [blizzardMode])
+    }, [darkMode])
 
     // Wind streaks for blizzard mode
     const windStreaks = useMemo(() => {
-        if (!blizzardMode) return []
+        if (!darkMode) return []
         return Array.from({ length: 30 }, (_, i) => ({
             id: i,
             y: Math.random() * 100,
@@ -38,12 +38,12 @@ export function SnowAnimation({ blizzardMode = false }: SnowAnimationProps) {
             width: 50 + Math.random() * 150,
             opacity: 0.03 + Math.random() * 0.08,
         }))
-    }, [blizzardMode])
+    }, [darkMode])
 
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
             {/* Wind streaks in blizzard mode */}
-            {blizzardMode && windStreaks.map((streak) => (
+            {darkMode && windStreaks.map((streak) => (
                 <motion.div
                     key={`streak-${streak.id}`}
                     className="absolute h-px bg-gradient-to-r from-transparent via-white to-transparent"
@@ -67,7 +67,7 @@ export function SnowAnimation({ blizzardMode = false }: SnowAnimationProps) {
             ))}
 
             {/* Fog/mist overlay in blizzard mode */}
-            {blizzardMode && (
+            {darkMode && (
                 <motion.div
                     className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/10"
                     animate={{
@@ -91,13 +91,13 @@ export function SnowAnimation({ blizzardMode = false }: SnowAnimationProps) {
                         width: flake.size,
                         height: flake.size,
                         opacity: flake.opacity,
-                        filter: blizzardMode ? 'blur(0.5px)' : undefined,
+                        filter: darkMode ? 'blur(0.5px)' : undefined,
                     }}
                     initial={{ y: -20, rotate: 0 }}
                     animate={{
                         y: '100vh',
-                        rotate: blizzardMode ? 180 : 360,
-                        x: blizzardMode
+                        rotate: darkMode ? 180 : 360,
+                        x: darkMode
                             ? [0, 100, 150, 200, 250]
                             : [0, 30, -20, 10, 0],
                     }}
@@ -109,14 +109,14 @@ export function SnowAnimation({ blizzardMode = false }: SnowAnimationProps) {
                         x: {
                             duration: flake.duration,
                             repeat: Infinity,
-                            ease: blizzardMode ? 'linear' : 'easeInOut',
+                            ease: darkMode ? 'linear' : 'easeInOut',
                         },
                     }}
                 />
             ))}
 
             {/* Extra small particles for blizzard */}
-            {blizzardMode && Array.from({ length: 60 }, (_, i) => (
+            {darkMode && Array.from({ length: 60 }, (_, i) => (
                 <motion.div
                     key={`particle-${i}`}
                     className="absolute rounded-full bg-white/60"

@@ -14,7 +14,7 @@ export default function App() {
     const [manualLocation, setManualLocation] = useState<{ coords: Coordinates; name: string } | null>(null)
     const [requestPreciseLocation] = useState(true) // Always prompt on initial load
     const [forceManualInput, setForceManualInput] = useState(false)
-    const [blizzardMode, setBlizzardMode] = useState(false)
+    const [darkMode, setDarkMode] = useState(false)
 
     // Fetch IP-based location (runs in background)
     const ipLocationQuery = useIpLocation()
@@ -24,12 +24,12 @@ export default function App() {
 
     useEffect(() => {
         // Toggle body class for background color
-        if (blizzardMode) {
+        if (darkMode) {
             document.body.classList.add('blizzard-mode')
         } else {
             document.body.classList.remove('blizzard-mode')
         }
-    }, [blizzardMode])
+    }, [darkMode])
 
     // Determine current location state
     const hasBrowserLocation = browserLocationQuery.isSuccess && browserLocationQuery.data
@@ -82,32 +82,31 @@ export default function App() {
     }
 
     return (
-        <div className={`min-h-screen flex flex-col items-center justify-center p-4 relative transition-colors duration-500 ${blizzardMode ? 'text-white' : ''}`}>
-            <SnowAnimation blizzardMode={blizzardMode} />
+        <div className={`min-h-screen flex flex-col items-center justify-center p-4 relative transition-colors duration-500 ${darkMode ? 'text-white' : ''}`}>
+            <SnowAnimation darkMode={darkMode} />
 
             {/* Blizzard Mode Toggle */}
             <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                onClick={() => setBlizzardMode(!blizzardMode)}
-                className={`fixed top-4 right-4 z-20 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${blizzardMode
+                onClick={() => setDarkMode(!darkMode)}
+                className={`fixed top-4 right-4 z-20 p-2 sm:px-4 sm:py-2 sm:w-[146px] sm:h-[46px] rounded-full text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${darkMode
                     ? 'bg-white/20 text-white border border-white/30 shadow-lg shadow-white/10'
                     : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 hover:text-white'
                     }`}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
             >
-                <span className="text-xl sm:text-lg">{blizzardMode ? '🌨️' : '🌙'}</span>
-                <span className="hidden sm:inline">{blizzardMode ? 'Blizzard' : 'Dark Mode'}</span>
+                <span className="text-xl sm:text-lg">{darkMode ? '🌨️' : '🌙'}</span>
+                <span className="hidden sm:inline">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
             </motion.button>
 
             <div className="relative z-10 w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                 {/* Header */}
-                <FrostyHeader blizzardMode={blizzardMode} />
+                <FrostyHeader darkMode={darkMode} />
 
                 {/* Main content */}
-                <div className={`backdrop-blur-md border rounded-3xl p-8 md:p-12 shadow-2xl transition-all duration-500 ${blizzardMode
+                <div className={`backdrop-blur-md border rounded-3xl p-8 md:p-12 shadow-2xl transition-all duration-500 ${darkMode
                     ? 'bg-black/30 border-white/10 shadow-white/5'
                     : 'bg-white/10 border-white/20'
                     }`}>

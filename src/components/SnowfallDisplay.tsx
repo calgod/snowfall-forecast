@@ -140,9 +140,11 @@ export function SnowfallDisplay({
                                 ☀️
                             </motion.div>
                             <p className={`text-xl md:text-2xl font-medium ${darkMode ? 'text-white/70' : 'text-white/90'}`}>
-                                No snow expected
+                                {selectedRange === 'last-week' ? 'No snow recorded' : 'No snow expected'}
                             </p>
-                            <p className="text-white/50 text-sm mt-1">Clear skies ahead!</p>
+                            <p className="text-white/50 text-sm mt-1">
+                                {selectedRange === 'last-week' ? 'It was a dry week!' : 'Clear skies ahead!'}
+                            </p>
                         </div>
                     )}
                 </div>

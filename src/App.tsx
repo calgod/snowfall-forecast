@@ -91,7 +91,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 onClick={() => setDarkMode(!darkMode)}
                 className={`fixed top-4 right-4 z-20 p-2 sm:px-4 sm:py-2 sm:w-[146px] sm:h-[46px] rounded-full text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${darkMode
-                    ? 'bg-white/20 text-white border border-white/30 shadow-lg shadow-white/10'
+                    ? 'bg-white/20 text-white/80 border border-white/30 shadow-lg shadow-white/10'
                     : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 hover:text-white'
                     }`}
                 whileHover={{ scale: 1.02 }}
@@ -107,7 +107,7 @@ export default function App() {
 
                 {/* Main content */}
                 <div className={`backdrop-blur-md border rounded-3xl p-8 md:p-12 shadow-2xl transition-all duration-500 ${darkMode
-                    ? 'bg-black/30 border-white/10 shadow-white/5'
+                    ? 'bg-black/50 border-white/10 shadow-white/5'
                     : 'bg-white/10 border-white/20'
                     }`}>
                     <AnimatePresence mode="wait">
@@ -132,7 +132,7 @@ export default function App() {
                                 exit={{ opacity: 0 }}
                                 className="flex flex-col items-center"
                             >
-                                <LocationInput onLocationFound={handleManualLocation} />
+                                <LocationInput onLocationFound={handleManualLocation} darkMode={darkMode} />
                             </motion.div>
                         )}
 
@@ -147,6 +147,7 @@ export default function App() {
                                     coords={currentCoords}
                                     manualLocationName={currentLocationName}
                                     isApproximate={isApproximate}
+                                    darkMode={darkMode}
                                     onReset={handleReset}
                                     onUsePreciseLocation={handleUsePreciseLocation}
                                 />

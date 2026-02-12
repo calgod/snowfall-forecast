@@ -8,6 +8,7 @@ interface SnowfallDisplayProps {
     coords: Coordinates
     manualLocationName?: string | undefined
     isApproximate?: boolean
+    darkMode?: boolean
     onReset: () => void
     onUsePreciseLocation?: () => void
 }
@@ -22,6 +23,7 @@ export function SnowfallDisplay({
     coords,
     manualLocationName,
     isApproximate,
+    darkMode,
     onReset,
     onUsePreciseLocation,
 }: SnowfallDisplayProps) {
@@ -80,7 +82,7 @@ export function SnowfallDisplay({
         >
             {/* ROW 1: Header */}
             <div className="flex-shrink-0">
-                <h2 className="text-2xl md:text-3xl font-medium text-white/90 mb-2">
+                <h2 className={`text-2xl md:text-3xl font-medium mb-2 ${darkMode ? 'text-white/70' : 'text-white/90'}`}>
                     {locationName}
                 </h2>
 
@@ -91,7 +93,7 @@ export function SnowfallDisplay({
                             key={range}
                             onClick={() => setSelectedRange(range)}
                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${selectedRange === range
-                                ? 'bg-white/20 border border-white/30 text-white'
+                                ? 'bg-white/20 border border-white/30 text-white/70'
                                 : 'bg-white/5 border border-transparent text-white/60 hover:text-white/80 hover:bg-white/10'
                                 }`}
                         >
@@ -113,7 +115,7 @@ export function SnowfallDisplay({
                     {snowfall > 0 ? (
                         <div>
                             <div className="flex items-baseline justify-center gap-2">
-                                <span className="font-bold text-white drop-shadow-lg text-5xl md:text-6xl lg:text-7xl">
+                                <span className={`font-bold drop-shadow-lg text-5xl md:text-6xl lg:text-7xl ${darkMode ? 'text-white/70' : 'text-white'}`}>
                                     {formatSnowfall(snowfall)}
                                 </span>
                                 <span className="text-white/70 font-light text-xl md:text-2xl">
@@ -137,7 +139,7 @@ export function SnowfallDisplay({
                             >
                                 ☀️
                             </motion.div>
-                            <p className="text-xl md:text-2xl font-medium text-white/90">
+                            <p className={`text-xl md:text-2xl font-medium ${darkMode ? 'text-white/70' : 'text-white/90'}`}>
                                 No snow expected
                             </p>
                             <p className="text-white/50 text-sm mt-1">Clear skies ahead!</p>
@@ -158,7 +160,7 @@ export function SnowfallDisplay({
                                             {formatDayName(day.date)}
                                         </span>
                                         <span
-                                            className={`text-sm font-semibold ${day.snowfallInches > 0 ? 'text-white' : 'text-white/30'
+                                            className={`text-sm font-semibold ${day.snowfallInches > 0 ? (darkMode ? 'text-white/70' : 'text-white') : 'text-white/30'
                                                 }`}
                                         >
                                             {day.snowfallInches > 0

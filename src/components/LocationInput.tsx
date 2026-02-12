@@ -5,9 +5,10 @@ import type { Coordinates } from '../types'
 
 interface LocationInputProps {
     onLocationFound: (coords: Coordinates, locationName: string) => void
+    darkMode?: boolean
 }
 
-export function LocationInput({ onLocationFound }: LocationInputProps) {
+export function LocationInput({ onLocationFound, darkMode }: LocationInputProps) {
     const [query, setQuery] = useState('')
     const [isSearching, setIsSearching] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -49,7 +50,7 @@ export function LocationInput({ onLocationFound }: LocationInputProps) {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="City, State or zip code"
-                        className="w-full px-6 py-4 text-lg appearance-none bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all"
+                        className={`w-full px-6 py-4 text-lg appearance-none bg-white/10 border border-white/20 rounded-2xl placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all ${darkMode ? 'text-white/70' : 'text-white'}`}
                         disabled={isSearching}
                     />
                     {isSearching && (
@@ -66,7 +67,7 @@ export function LocationInput({ onLocationFound }: LocationInputProps) {
                 <motion.button
                     type="submit"
                     disabled={isSearching || !query.trim()}
-                    className="px-8 py-4 appearance-none bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:cursor-not-allowed border border-white/20 rounded-2xl text-white font-medium text-lg transition-all"
+                    className={`px-8 py-4 appearance-none bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:cursor-not-allowed border border-white/20 rounded-2xl font-medium text-lg transition-all ${darkMode ? 'text-white/70' : 'text-white'}`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >

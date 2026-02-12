@@ -214,8 +214,9 @@ function formatLocationName(
 }
 
 function formatSnowfall(inches: number): string {
-    if (inches === Math.floor(inches)) return inches.toString()
-    return inches.toFixed(1)
+    const formatted = inches.toFixed(3)
+    const num = parseFloat(formatted)
+    return num % 1 === 0 ? num.toFixed(1) : num.toString()
 }
 
 function formatDate(dateString: string | undefined): string {

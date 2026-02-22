@@ -218,7 +218,7 @@ function formatLocationName(
 }
 
 function formatSnowfall(inches: number): string {
-    const formatted = inches.toFixed(3)
+    const formatted = inches.toFixed(2)
     const num = parseFloat(formatted)
     return num % 1 === 0 ? num.toFixed(1) : num.toString()
 }
